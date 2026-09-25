@@ -9,7 +9,7 @@ doc = SimpleDocTemplate("docs/etapa1-definicao-projeto.pdf", pagesize=A4,
 itens = [
     Paragraph("Projeto de VVS - Definição do Projeto", estilos["Title"]),
     Spacer(1, 12),
-    Paragraph("<b>Aluno:</b> ______________________________", estilos["Normal"]),
+    Paragraph("<b>Aluno:</b> Rafael Elias Ioppi", estilos["Normal"]),
     Spacer(1, 10),
     Paragraph("<b>Sistema:</b> Biblioteca", estilos["Normal"]),
     Spacer(1, 6),
