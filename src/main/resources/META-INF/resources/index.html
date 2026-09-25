@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Biblioteca</title>
+<style>
+  body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; }
+  input { margin: 2px; padding: 4px; }
+  li { margin: 4px 0; }
+  .erro { color: #b00020; }
+</style>
+</head>
+<body>
+<h1>Biblioteca</h1>
+
+<h2>Cadastrar livro</h2>
+<form id="form-livro">
+  <input id="titulo" placeholder="Titulo">
+  <input id="autor" placeholder="Autor">
+  <input id="isbn" placeholder="ISBN">
+  <input id="exemplares" type="number" placeholder="Exemplares" value="1">
+  <button id="btn-cadastrar" type="submit">Cadastrar</button>
+</form>
+<p id="mensagem" class="erro"></p>
+
+<h2>Livros</h2>
+<ul id="lista-livros"></ul>
+
+<h2>Emprestimos</h2>
+<ul id="lista-emprestimos"></ul>
+
+<script>
+const msg = document.getElementById('mensagem');
+
+function esc(texto) {
+  const d = document.createElement('div');
+  d.textContent = texto;
+  return d.innerHTML;
+}
+
+async function chamar(url, opcoes) {
+  const r = await fetch(url, opcoes);
+  if (!r.ok) {
+    const corpo = await r.json().catch(() => ({}));
+    const detalhe = corpo.erro || (corpo.violations || []).map(v => v.message).join(', ') || r.status;
+    throw new Error(detalhe);
+  }
+  return r.status === 204 ? null : r.json();
+}
+
+async function carregar() {
+  const livros = await chamar('/livros');
+  const ul = document.getElementById('lista-livros');
+  ul.innerHTML = '';
+  livros.forEach(l => {
+    const li = document.createElement('li');
+    li.className = 'livro';
+    li.innerHTML = '<span class="titulo">' + esc(l.titulo) + '</span> - ' + esc(l.autor) +
+      ' (<span class="disponiveis">' + l.exemplaresDisponiveis + '</span>/' + l.exemplaresTotal + ') ' +
+      '<input class="usuario" placeholder="Seu nome"> <button class="emprestar">Emprestar</button>';
+    li.querySelector('.emprestar').onclick = async () => {
+      try {
+        msg.textContent = '';
+        await chamar('/emprestimos', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({livroId: l.id, usuario: li.querySelector('.usuario').value})
+        });
+        carregar();
+      } catch (e) { msg.textContent = e.message; }
+    };
+    ul.appendChild(li);
+  });
+
+  const emprestimos = await chamar('/emprestimos');
+  const ule = document.getElementById('lista-emprestimos');
+  ule.innerHTML = '';
+  emprestimos.forEach(e => {
+    const li = document.createElement('li');
+    li.className = 'emprestimo';
+    const ativo = !e.dataDevolucao;
+    li.innerHTML = esc(e.livro.titulo) + ' - ' + esc(e.usuario) + ' - ' + (ativo ? 'ativo' : 'devolvido') +
+      (ativo ? ' <button class="devolver">Devolver</button>' : '');
+    if (ativo) {
+      li.querySelector('.devolver').onclick = async () => {
+        await chamar('/emprestimos/' + e.id + '/devolucao', {method: 'PUT'});
+        carregar();
+      };
+    }
+    ule.appendChild(li);
+  });
+}
+
+document.getElementById('form-livro').onsubmit = async ev => {
+  ev.preventDefault();
+  try {
+    msg.textContent = '';
+    await chamar('/livros', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        titulo: document.getElementById('titulo').value,
+        autor: document.getElementById('autor').value,
+        isbn: document.getElementById('isbn').value,
+        exemplaresTotal: parseInt(document.getElementById('exemplares').value, 10)
+      })
+    });
+    ev.target.reset();
+    carregar();
+  } catch (e) { msg.textContent = e.message; }
+};
+
+carregar();
+</script>
+</body>
+</html>
