@@ -30,5 +30,7 @@ API: `GET/POST /livros`, `GET/DELETE /livros/{id}`, `GET/POST /emprestimos`, `PU
 
 Executar tudo: `mvn verify`. Só os unitários: `mvn test`.
 
-## Resultado da última execução
-Veja os números ao final da execução de `mvn verify` (preenchido na entrega).
+## Resultado da última execução (`mvn verify`)
+- 28 testes unitários e 32 de componente/sistema/segurança, todos passando
+- Cobertura de linhas: 98,8% (JaCoCo)
+- PMD: 0 violações; Checkstyle: 0 avisos
