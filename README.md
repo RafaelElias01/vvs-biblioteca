@@ -25,7 +25,7 @@ API: `GET/POST /livros`, `GET/DELETE /livros/{id}`, `GET/POST /emprestimos`, `PU
 | Cobertura (JaCoCo) | — | `mvn verify` → `target/site/jacoco/index.html` |
 | Testes de componente (RestAssured + H2) | `src/test/java/.../component` | `mvn verify` (Failsafe, classes `*IT`) |
 | Testes de sistema (Playwright) | `src/test/java/.../system` | `mvn verify` (Failsafe, classes `*IT`); evidências em `target/evidencias/` |
-| Carga (extra, k6) | `k6/carga.js` | `mvn quarkus:dev` e em outro terminal `k6 run k6/carga.js` |
+| Carga (extra, k6) | `k6/carga.js`, [docs/carga.md](docs/carga.md) | subir a aplicação e rodar `k6 run k6/carga.js` |
 | Segurança (extra) | `src/test/java/.../security`, [docs/seguranca.md](docs/seguranca.md) | `mvn verify` (classe `SegurancaApiIT`) |
 
 Executar tudo: `mvn verify`. Só os unitários: `mvn test`.
